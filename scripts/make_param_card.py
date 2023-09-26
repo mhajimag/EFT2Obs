@@ -6,7 +6,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--process', '-p', default='zh-HEL', help="Label of the process, must correspond to the dir name that was created in the MG dir")
 parser.add_argument('--output', '-o', default='param_card.dat', help="Output name for the param_card.dat")
-parser.add_argument('--config', '-c', default='config.json')
+# parser.add_argument('--config', '-c', default='config.json')
 args = parser.parse_args()
 
 
@@ -17,7 +17,7 @@ sys.path.append(os.path.join(os.environ['MG_DIR'], process.split('/')[-1], 'bin'
 
 import check_param_card as param_card_mod
 
-cfg = tools.GetConfigFile(args.config)
+# cfg = tools.GetConfigFile(args.config)
 
 param_card_path = '%s/%s/Cards/param_card.dat' % (os.environ['MG_DIR'], process.split('/')[-1])
 print '>> Parsing %s' % param_card_path
@@ -27,29 +27,28 @@ param_card = param_card_mod.ParamCard(param_card_path)
 before = []
 after = []
 
-for block in cfg['blocks']:
-    ids = [X[0] for X in param_card[block].keys()]
+# for block in cfg['blocks']:
+#     print(block)
+#     ids = [X[0] for X in param_card[block].keys()]
+#     print(ids)
+ids = [X[0] for X in param_card['SMEFT'].keys()]
 
-    for i in ids:
-        par = param_card[block].param_dict[(i,)]
-        before.append([block, i, par.comment.strip(), par.value])
-        par.value = cfg['inactive']['default_val']
-
-for p in cfg['parameters']:
-    par = param_card[p['block']].param_dict[(p['index'],)]
-    par.value = p['gen']
-
-for p in cfg['inactive']['parameters']:
-    par = param_card[p['block']].param_dict[(p['index'],)]
-    par.value = p['val']
+for i in ids:
+    par = param_card['SMEFT'].param_dict[(i,)]
+#     print(par)
+    before.append(['SMEFT', i, par.comment.strip(), par.value])
+#     print(before)
+    if i == 2 or i == 9:
+        par.value = 0.00001
+    
 
 
-for block in cfg['blocks']:
-    ids = [X[0] for X in param_card[block].keys()]
 
-    for i in ids:
-        par = param_card[block].param_dict[(i,)]
-        after.append([block, i, par.comment.strip(), par.value])
+
+
+for i in ids:
+    par = param_card['SMEFT'].param_dict[(i,)]
+    after.append(['SMEFT', i, par.comment.strip(), par.value])
 
 print '>> The following active and inactive parameter changes will be applied:'
 for b, a in zip(before, after):
